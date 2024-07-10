@@ -92,7 +92,7 @@ public class Watcher
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        Action<object> callback = (state) =>
+        Action<object?> callback = (state) =>
         {
             string message = $"{DateTime.Now.ToString("h:mm:ss tt")} - Changed: {e.FullPath}";
             string newItem = e.FullPath.Replace(_inputFolder, _outputFolder);
@@ -121,7 +121,7 @@ public class Watcher
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        Action<object> callback = (state) =>
+        Action<object?> callback = (state) =>
         {
             string message = $"{DateTime.Now.ToString("h:mm:ss tt")} - Created: {e.FullPath}";
             string newItem = e.FullPath.Replace(_inputFolder, _outputFolder);
@@ -152,7 +152,7 @@ public class Watcher
 
     private void OnDeleted(object sender, FileSystemEventArgs e)
     {
-        Action<object> callback = (state) =>
+        Action<object?> callback = (state) =>
         {
             string message = $"{DateTime.Now.ToString("h:mm:ss tt")} - Deleted: {e.FullPath}";
             string newItem = e.FullPath.Replace(_inputFolder, _outputFolder);
@@ -183,7 +183,7 @@ public class Watcher
 
     private void OnRenamed(object sender, RenamedEventArgs e)
     {
-        Action<object> callback = (state) =>
+        Action<object?> callback = (state) =>
         {
             string message =
                 $"{DateTime.Now.ToString("h:mm:ss tt")} - Renamed: {e.OldFullPath} to {e.FullPath}";
