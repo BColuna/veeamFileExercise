@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
+using Microsoft.VisualBasic.FileIO;
 
 namespace veeamFileExercise;
 
@@ -65,14 +67,26 @@ public class Watcher
         }
     }
 
-    private static void OnChanged(object sender, FileSystemEventArgs e)
+    private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        //TO-DO
-        if (e.ChangeType != WatcherChangeTypes.Changed)
+        string message = $"{DateTime.Now.ToString("h:mm:ss tt")} - Changed: {e.FullPath}";
+        string newItem = e.FullPath.Replace(_inputFolder, _outputFolder);
+
+        for (int i = 0; i < 5; i++)
         {
-            return;
+            try
+            {
+                if (!IsDirectory(e.FullPath))
+                    File.Copy(e.FullPath, newItem, true);
+                break;
+            }
+            catch (IOException)
+            {
+                Thread.Sleep(1000);
+            }
         }
-        Console.WriteLine($"Changed: {e.FullPath}");
+        AddLogEntry(message);
+        Console.WriteLine(message);
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
@@ -88,6 +102,7 @@ public class Watcher
                     Directory.CreateDirectory(newItem);
                 else
                     File.Copy(e.FullPath, newItem);
+                break;
             }
             catch (IOException)
             {
@@ -98,18 +113,55 @@ public class Watcher
         Console.WriteLine(message);
     }
 
-    private static void OnDeleted(object sender, FileSystemEventArgs e)
+    private void OnDeleted(object sender, FileSystemEventArgs e)
     {
-        //TO-DO
-        Console.WriteLine($"Deleted: {e.FullPath}");
+        string message = $"{DateTime.Now.ToString("h:mm:ss tt")} - Deleted: {e.FullPath}";
+        string newItem = e.FullPath.Replace(_inputFolder, _outputFolder);
+
+        for (int i = 0; i < 5; i++)
+        {
+            try
+            {
+                if (IsDirectory(newItem))
+                    Directory.Delete(newItem, true);
+                else
+                    File.Delete(newItem);
+                break;
+            }
+            catch (IOException)
+            {
+                Thread.Sleep(1000);
+            }
+        }
+        AddLogEntry(message);
+        Console.WriteLine(message);
     }
 
-    private static void OnRenamed(object sender, RenamedEventArgs e)
+    private void OnRenamed(object sender, RenamedEventArgs e)
     {
-        //TO-DO
-        Console.WriteLine($"Renamed:");
-        Console.WriteLine($"    Old: {e.OldFullPath}");
-        Console.WriteLine($"    New: {e.FullPath}");
+        string message =
+            $"{DateTime.Now.ToString("h:mm:ss tt")} - Renamed: {e.OldFullPath} to {e.FullPath}";
+        string oldItemPath = e.OldFullPath.Replace(_inputFolder, _outputFolder);
+        string newItemName = Path.GetFileName(e.FullPath);
+
+        for (int i = 0; i < 5; i++)
+        {
+            try
+            {
+                if (IsDirectory(e.FullPath))
+                    FileSystem.RenameDirectory(oldItemPath, newItemName);
+                else
+                    FileSystem.RenameFile(oldItemPath, newItemName);
+                break;
+            }
+            catch (IOException)
+            {
+                Thread.Sleep(1000);
+            }
+        }
+
+        AddLogEntry(message);
+        Console.WriteLine(message);
     }
 
     private static void OnError(object sender, ErrorEventArgs e)
